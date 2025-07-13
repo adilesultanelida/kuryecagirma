@@ -4,66 +4,54 @@
   <meta charset="UTF-8" />
   <title>Kurye Bildirim Müdür Paneli</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 100px;
-      background-color: #f0f0f0;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; background:#f0f0f0; }
     button {
-      padding: 20px 50px;
-      font-size: 28px;
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      padding: 15px 40px; font-size: 24px;
+      margin: 10px; border-radius: 10px; border:none; cursor: pointer;
     }
-    button:hover {
-      background-color: #c0392b;
-    }
-    #status {
-      margin-top: 20px;
-      font-size: 20px;
-      color: #2c3e50;
-    }
+    #callBtn { background: #e74c3c; color: white; }
+    #cancelBtn { background: #3498db; color: white; }
+    #status { margin-top: 20px; font-size: 20px; color: #2c3e50; }
   </style>
 </head>
 <body>
   <h1>Kurye Çağırma Paneli</h1>
-  <button id="callButton">Kurye Çağır</button>
+  <button id="callBtn">Kurye Çağır</button>
+  <button id="cancelBtn">Çağrıyı İptal Et</button>
   <div id="status"></div>
 
   <script>
-    const button = document.getElementById('callButton');
+    const callBtn = document.getElementById('callBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
     const statusDiv = document.getElementById('status');
 
-    button.addEventListener('click', () => {
-      statusDiv.textContent = 'Bildirim gönderiliyor...';
-
-      fetch('https://kuryecagirma.vercel.app/api/ping', {
-        method: 'POST'
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP Hatası: ${response.status}`);
-          }
-          return response.json();
-        })
+    callBtn.onclick = () => {
+      statusDiv.textContent = 'Çağrı gönderiliyor...';
+      fetch('https://kuryecagirma.vercel.app/api/call', { method: 'POST' })
+        .then(res => res.json())
         .then(data => {
-          if (data.success) {
-            statusDiv.textContent = 'Kurye çağrıldı! ✅';
+          if(data.success) {
+            statusDiv.textContent = data.message;
           } else {
-            statusDiv.textContent = 'Beklenmeyen cevap alındı!';
+            statusDiv.textContent = 'Bir hata oluştu!';
           }
-          console.log('API cevabı:', data);
         })
-        .catch(error => {
-          statusDiv.textContent = 'Bildirim gönderilemedi! ❌';
-          console.error('Hata:', error);
-        });
-    });
+        .catch(() => statusDiv.textContent = 'Sunucu hatası!');
+    };
+
+    cancelBtn.onclick = () => {
+      statusDiv.textContent = 'Çağrı iptal ediliyor...';
+      fetch('https://kuryecagirma.vercel.app/api/call', { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            statusDiv.textContent = data.message;
+          } else {
+            statusDiv.textContent = 'Bir hata oluştu!';
+          }
+        })
+        .catch(() => statusDiv.textContent = 'Sunucu hatası!');
+    };
   </script>
 </body>
 </html>
