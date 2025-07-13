@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kurye Paneli</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 100px; }
+    button { padding: 20px 40px; font-size: 24px; background-color: red; color: white; border: none; border-radius: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Kurye Çağırma Paneli</h1>
+  <button onclick="callCouriers()">Kurye Çağır</button>
+  <script>
+    function callCouriers() {
+      fetch('/api/ping', {method: 'POST'})
+        .then(() => alert("Kuryelere çağrı gönderildi!"))
+        .catch(() => alert("Çağrı başarısız oldu!"));
+    }
+  </script>
+</body>
+</html>
