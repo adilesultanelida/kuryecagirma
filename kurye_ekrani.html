@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,23 +10,34 @@
 <body>
   <h1>Kurye Bildirim Ekranı</h1>
   <p id="status">Hazır, çağrı bekleniyor...</p>
-  <audio id="ding" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
+  <audio id="ding" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
   <script>
     const ding = document.getElementById("ding");
     let lastPing = null;
+    let resetTimeout = null;
+
     async function checkPing() {
       try {
         const res = await fetch("/api/ping.json");
         const data = await res.json();
+
         if (lastPing !== data.time) {
           lastPing = data.time;
           ding.play();
-          document.getElementById("status").innerText = "📢 Kurye çağrıldı!";
+          document.getElementById("status").innerText = "📢 Yemekler Hazır Kurye Bekleniyor !";
+          
+          if (resetTimeout) clearTimeout(resetTimeout);
+          resetTimeout = setTimeout(() => {
+            document.getElementById("status").innerText = "Hazır, çağrı bekleniyor...";
+          }, 60000); // 60 saniye sonra sıfırla
         }
+
       } catch {
         document.getElementById("status").innerText = "❌ Bağlantı hatası!";
       }
     }
+
     setInterval(checkPing, 3000);
   </script>
 </body>
