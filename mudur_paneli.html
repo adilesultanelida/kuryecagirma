@@ -1,22 +1,63 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>Kurye Paneli</title>
+  <meta charset="UTF-8" />
+  <title>Kurye Bildirim Müdür Paneli</title>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 100px; }
-    button { padding: 20px 40px; font-size: 24px; background-color: red; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #f0f0f0;
+    }
+    button {
+      padding: 20px 50px;
+      font-size: 28px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #c0392b;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #2c3e50;
+    }
   </style>
 </head>
 <body>
   <h1>Kurye Çağırma Paneli</h1>
-  <button onclick="callCouriers()">Kurye Çağır</button>
+  <button id="callButton">Kurye Çağır</button>
+  <div id="status"></div>
+
   <script>
-    function callCouriers() {
-      fetch('/api/ping', {method: 'POST'})
-        .then(() => alert("Kuryelere çağrı gönderildi!"))
-        .catch(() => alert("Çağrı başarısız oldu!"));
-    }
+    const button = document.getElementById('callButton');
+    const statusDiv = document.getElementById('status');
+
+    button.addEventListener('click', () => {
+      statusDiv.textContent = 'Bildirim gönderiliyor...';
+
+      fetch('https://kuryecagirma.vercel.app/api/ping')  // GET isteği
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP Hatası: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          statusDiv.textContent = 'Kurye çağrıldı! ✅';
+          console.log('API cevabı:', data);
+        })
+        .catch(error => {
+          statusDiv.textContent = 'Bildirim gönderilemedi! ❌';
+          console.error('Hata:', error);
+        });
+    });
   </script>
 </body>
 </html>
