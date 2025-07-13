@@ -10,13 +10,13 @@
 </head>
 <body>
   <h1>Kurye Çağırma Paneli</h1>
-<button onclick="cagir()">Kurye Çağır</button>
-<script>
-  function cagir() {
-    fetch('/api/ping', { method: 'POST' })
-      .then(res => res.json())
-      .then(data => console.log('Kurye çağrıldı:', data));
-  }
-</script>
+  <button onclick="callCouriers()">Kurye Çağır</button>
+  <script>
+    function callCouriers() {
+      fetch('/api/ping', {method: 'POST'})
+        .then(() => alert("Kuryelere çağrı gönderildi!"))
+        .catch(() => alert("Çağrı başarısız oldu!"));
+    }
+  </script>
 </body>
 </html>
