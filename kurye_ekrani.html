@@ -1,85 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <title>Kurye Ekranı</title>
+  <meta charset="UTF-8" />
+  <title>Kurye Paneli</title>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 100px; }
-    #status { font-size: 32px; color: green; }
-    #countdown { font-size: 24px; color: #555; margin-top: 10px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; background:#fafafa; }
+    #message { font-size: 28px; color: #e74c3c; }
   </style>
 </head>
 <body>
-  <h1>Kurye Bildirim Ekranı</h1>
-  <p id="status">Hazır, çağrı bekleniyor...</p>
-  <p id="countdown"></p>
-  <audio id="ding" src="ding.mp3" preload="auto"></audio>
+  <h1>Kurye Durum Ekranı</h1>
+  <div id="message">Bekleniyor...</div>
 
   <script>
-    const statusText = document.getElementById("status");
-    const countdownText = document.getElementById("countdown");
-    const ding = new Audio("ding.mp3");
-    let lastPing = null;
-    let initialized = false; // F5 çözücü
-    let countdownInterval = null;
-    let countdownSeconds = 60;
+    const msgDiv = document.getElementById('message');
 
-    // Bildirim izni iste
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-
-    function startCountdown() {
-      countdownSeconds = 60;
-      countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
-
-      countdownInterval = setInterval(() => {
-        countdownSeconds--;
-        countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
-
-        if (countdownSeconds <= 0) {
-          clearInterval(countdownInterval);
-          statusText.innerText = "Hazır, çağrı bekleniyor...";
-          countdownText.innerText = "";
-        }
-      }, 1000);
-    }
-
-    async function checkPing() {
-      try {
-        const res = await fetch("/api/ping.json");
-        const data = await res.json();
-
-        if (!initialized) {
-          // İlk açılışta gelen değeri al, ama işlem yapma
-          lastPing = data.time;
-          initialized = true;
-          return;
-        }
-
-        if (data.time !== lastPing) {
-          lastPing = data.time;
-
-          // Bildirim ve ses
-          if (Notification.permission === "granted") {
-            new Notification("Kurye Çağrısı", {
-              body: "Müdür seni çağırdı!",
-              icon: "https://cdn-icons-png.flaticon.com/512/1827/1827349.png"
-            });
+    function checkStatus() {
+      fetch('https://kuryecagirma.vercel.app/api/status')
+        .then(res => res.json())
+        .then(data => {
+          if(data.callActive) {
+            msgDiv.textContent = 'Kurye çağrıldı, lütfen bekleyin!';
+          } else {
+            msgDiv.textContent = 'Bekleniyor...';
           }
-
-          ding.play().catch(() => {});
-          statusText.innerText = "📢 Yemekler hazır kurye bekleniyor !!!";
-
-          if (countdownInterval) clearInterval(countdownInterval);
-          startCountdown();
-        }
-      } catch {
-        statusText.innerText = "❌ Bağlantı hatası!";
-        countdownText.innerText = "";
-      }
+        })
+        .catch(() => {
+          msgDiv.textContent = 'Sunucuya bağlanılamıyor!';
+        });
     }
 
-    setInterval(checkPing, 3000);
+    setInterval(checkStatus, 3000);
+    checkStatus();
   </script>
 </body>
 </html>
