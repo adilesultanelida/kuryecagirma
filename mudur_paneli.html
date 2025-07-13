@@ -42,7 +42,9 @@
     button.addEventListener('click', () => {
       statusDiv.textContent = 'Bildirim gönderiliyor...';
 
-      fetch('https://kuryecagirma.vercel.app/api/ping')  // GET isteği
+      fetch('https://kuryecagirma.vercel.app/api/ping', {
+        method: 'POST'
+      })
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP Hatası: ${response.status}`);
@@ -50,7 +52,11 @@
           return response.json();
         })
         .then(data => {
-          statusDiv.textContent = 'Kurye çağrıldı! ✅';
+          if (data.success) {
+            statusDiv.textContent = 'Kurye çağrıldı! ✅';
+          } else {
+            statusDiv.textContent = 'Beklenmeyen cevap alındı!';
+          }
           console.log('API cevabı:', data);
         })
         .catch(error => {
