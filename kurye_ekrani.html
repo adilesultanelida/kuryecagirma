@@ -5,17 +5,38 @@
   <style>
     body { font-family: Arial; text-align: center; margin-top: 100px; }
     #status { font-size: 32px; color: green; }
+    #countdown { font-size: 24px; color: #555; margin-top: 10px; }
   </style>
 </head>
 <body>
   <h1>Kurye Bildirim Ekranı</h1>
   <p id="status">Hazır, çağrı bekleniyor...</p>
+  <p id="countdown"></p>
   <audio id="ding" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
   <script>
     const ding = document.getElementById("ding");
+    const statusText = document.getElementById("status");
+    const countdownText = document.getElementById("countdown");
     let lastPing = null;
-    let resetTimeout = null;
+    let countdownInterval = null;
+    let countdownSeconds = 60;
+
+    function startCountdown() {
+      countdownSeconds = 60;
+      countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
+
+      countdownInterval = setInterval(() => {
+        countdownSeconds--;
+        countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
+
+        if (countdownSeconds <= 0) {
+          clearInterval(countdownInterval);
+          statusText.innerText = "Hazır, çağrı bekleniyor...";
+          countdownText.innerText = "";
+        }
+      }, 1000);
+    }
 
     async function checkPing() {
       try {
@@ -25,16 +46,16 @@
         if (lastPing !== data.time) {
           lastPing = data.time;
           ding.play();
-          document.getElementById("status").innerText = "📢 Yemekler Hazır Kurye Bekleniyor !";
+          statusText.innerText = "📢 Kurye çağrıldı!";
           
-          if (resetTimeout) clearTimeout(resetTimeout);
-          resetTimeout = setTimeout(() => {
-            document.getElementById("status").innerText = "Hazır, çağrı bekleniyor...";
-          }, 60000); // 60 saniye sonra sıfırla
+          // Geri sayacı sıfırla ve başlat
+          if (countdownInterval) clearInterval(countdownInterval);
+          startCountdown();
         }
 
       } catch {
-        document.getElementById("status").innerText = "❌ Bağlantı hatası!";
+        statusText.innerText = "❌ Bağlantı hatası!";
+        countdownText.innerText = "";
       }
     }
 
