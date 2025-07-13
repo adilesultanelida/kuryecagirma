@@ -1,58 +1,65 @@
-<script>
-  const ding = new Audio("https://www.soundjay.com/button/beep-07.wav");
-  const statusText = document.getElementById("status");
-  const countdownText = document.getElementById("countdown");
-  let lastPing = null;
-  let countdownInterval = null;
-  let countdownSeconds = 60;
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kurye Ekranı</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 100px; }
+    #status { font-size: 32px; color: green; }
+    #countdown { font-size: 24px; color: #555; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Kurye Bildirim Ekranı</h1>
+  <p id="status">Hazır, çağrı bekleniyor...</p>
+  <p id="countdown"></p>
+  <audio id="ding" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
-  // Tarayıcıdan bildirim izni iste
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
+  <script>
+    const ding = document.getElementById("ding");
+    const statusText = document.getElementById("status");
+    const countdownText = document.getElementById("countdown");
+    let lastPing = null;
+    let countdownInterval = null;
+    let countdownSeconds = 60;
 
-  function startCountdown() {
-    countdownSeconds = 60;
-    countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
-    countdownInterval = setInterval(() => {
-      countdownSeconds--;
+    function startCountdown() {
+      countdownSeconds = 60;
       countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
 
-      if (countdownSeconds <= 0) {
-        clearInterval(countdownInterval);
-        statusText.innerText = "Hazır, çağrı bekleniyor...";
-        countdownText.innerText = "";
-      }
-    }, 1000);
-  }
+      countdownInterval = setInterval(() => {
+        countdownSeconds--;
+        countdownText.innerText = `Kalan: ${countdownSeconds} sn`;
 
-  async function checkPing() {
-    try {
-      const res = await fetch("/api/ping.json");
-      const data = await res.json();
+        if (countdownSeconds <= 0) {
+          clearInterval(countdownInterval);
+          statusText.innerText = "Hazır, çağrı bekleniyor...";
+          countdownText.innerText = "";
+        }
+      }, 1000);
+    }
 
-      if (lastPing !== data.time) {
-        lastPing = data.time;
-        statusText.innerText = "📢 Kurye çağrıldı!";
-        
-        // Bildirim gönder
-        if (Notification.permission === "granted") {
-          new Notification("Kurye Çağrısı", { body: "Müdür seni çağırdı!", icon: "https://cdn-icons-png.flaticon.com/512/1827/1827349.png" });
+    async function checkPing() {
+      try {
+        const res = await fetch("/api/ping.json");
+        const data = await res.json();
+
+        if (lastPing !== data.time) {
+          lastPing = data.time;
+          ding.play();
+          statusText.innerText = "📢 Kurye çağrıldı!";
+          
+          // Geri sayacı sıfırla ve başlat
+          if (countdownInterval) clearInterval(countdownInterval);
+          startCountdown();
         }
 
-        // Ses çal (mobilde etkileşimli değilse çalmaz)
-        ding.play().catch(() => {});
-
-        // Sayaç başlat
-        if (countdownInterval) clearInterval(countdownInterval);
-        startCountdown();
+      } catch {
+        statusText.innerText = "❌ Bağlantı hatası!";
+        countdownText.innerText = "";
       }
-
-    } catch {
-      statusText.innerText = "❌ Bağlantı hatası!";
-      countdownText.innerText = "";
     }
-  }
 
-  setInterval(checkPing, 3000);
-</script>
+    setInterval(checkPing, 3000);
+  </script>
+</body>
+</html>
